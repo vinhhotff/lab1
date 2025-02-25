@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useForm, isEmail, hasLength } from "@mantine/form";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -88,7 +88,7 @@ export default function RegisterPage() {
             {/* Sign In Link */}
             <div className="text-sm text-center text-gray-600 mt-4">
               Already have an account? 
-              <a href="/" className="text-teal-600 hover:underline ml-1">Sign in</a>
+              <Link to="/" className="text-teal-600 hover:underline ml-1">Sign in</Link>
             </div>
           </form>
         </CardContent>
