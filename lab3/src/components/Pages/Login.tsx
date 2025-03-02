@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+<<<<<<< HEAD
 import { Link, useNavigate } from "react-router-dom";
 import {
   TextField,
@@ -18,6 +19,9 @@ import {
 } from "../Firebaseconfig/FireBaseconfig";
 import Googleicon from "@mui/icons-material/Google";
 import { onAuthStateChanged } from "firebase/auth";
+=======
+import { Link } from "react-router-dom";
+>>>>>>> 2f3b2378f95c2c95c412463da56290120e35e99c
 
 export default function LoginPage() {
   const navigate = useNavigate();
