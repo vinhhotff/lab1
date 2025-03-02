@@ -1,75 +1,150 @@
 /* eslint-disable no-unused-vars */
-import { useForm, isEmail, hasLength } from "@mantine/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link, Links } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  TextField,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Typography,
+  Box,
+} from "@mui/material";
+import {
+  auth,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "../Firebaseconfig/FireBaseconfig";
+import Googleicon from "@mui/icons-material/Google";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function LoginPage() {
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: { email: "", password: "" },
-    validate: {
-      email: isEmail("Invalid email"),
-      password: hasLength({ min: 6 }, "Password must be at least 6 characters"),
-    },
-  });
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        localStorage.setItem("token", user.uid); // Lưu token hoặc user info
+        navigate("/dashboard"); // Nếu đã đăng nhập, chuyển hướng luôn
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+  const handleLogicbasic = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/dashboard");
+    } catch (error) {
+      setError("Email or Password is Incorrect !");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      console.log("User signed in:", result.user);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      setError("Đăng nhập Google thất bại!");
+    }
+  };
 
   return (
-    <div className="bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center min-h-screen p-4">
-      <Card className="w-full max-w-md bg-white shadow-xl rounded-2xl p-6">
+    <div className="bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center min-h-screen p-6">
+      <Card className="w-full max-w-lg bg-white shadow-xl rounded-2xl p-8">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-gray-700">Welcome Back</CardTitle>
-          <p className="text-gray-500 text-sm">Sign in to continue</p>
+          <CardTitle className="text-4xl font-bold text-gray-700">
+            Welcome Back
+          </CardTitle>
+          <p className="text-gray-500 text-sm pb-3">Sign in to continue</p>
         </CardHeader>
         <CardContent>
-          <form
-            className="space-y-6"
-            onSubmit={form.onSubmit((values) => {
-              console.log("Submitted values:", values);
-            })}
-          >
+          <form className="space-y-6">
             {/* Email Input */}
             <div>
-              <Label htmlFor="email" className="text-gray-700">Email</Label>
-              <Input
-                {...form.getInputProps("email")}
-                key={form.key("email")}
-                type="email"
-                placeholder="Enter your email"
-                className="mt-1 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              {form.errors.email && (
-                <p className="text-red-500 text-sm mt-1">{form.errors.email}</p>
+              {error && (
+                <Typography color="error" fontSize="0.875rem">
+                  {error}
+                </Typography>
               )}
+  
+              <TextField
+                label="Email"
+                type="email"
+                variant="outlined"
+                fullWidth
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                sx={{
+                  "& fieldset": { borderColor: "gray" }, // Thêm viền màu xám
+                  "&:hover fieldset": { borderColor: "black" }, // Khi hover đổi màu viền
+                  "&.Mui-focused fieldset": { borderColor: "blue" }, // Khi focus viền màu xanh
+                }}
+              />
             </div>
 
             {/* Password Input */}
-            <div>
-              <Label htmlFor="password" className="text-gray-700">Password</Label>
-              <Input
-                {...form.getInputProps("password")}
-                key={form.key("password")}
+            <div>           
+              <TextField
+                label="Password"
                 type="password"
-                placeholder="Enter your password"
-                className="mt-1 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                variant="outlined"
+                fullWidth
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                sx={{
+                  "& fieldset": { borderColor: "gray" },
+                  "&:hover fieldset": { borderColor: "black" },
+                  "&.Mui-focused fieldset": { borderColor: "blue" },
+                }}
               />
-              {form.errors.password && (
-                <p className="text-red-500 text-sm mt-1">{form.errors.password}</p>
-              )}
             </div>
 
+            {/* Remember Me & Forgot Password */}
+            <Box display="flex" justifyContent="space-between" width="100%">
+              <FormControlLabel control={<Checkbox />} label="Remember me" />
+              <Typography variant="body2" sx={{ cursor: "pointer" , paddingTop:"9px"}}>
+                Forgot password?
+              </Typography>
+            </Box>
+
             {/* Submit Button */}
-            <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg">
-                <Link to="/Register"> Sign in</Link>
+            <Button
+              fullWidth
+              variant="contained"
+              sx={{ background: "#3f51b5", height: "45px",borderRadius:"12px" }}
+              onClick={handleLogicbasic}
+            >
+              Sign in
+            </Button>
+
+            {/* Google Sign In */}
+            <Button
+              fullWidth
+              variant="contained"
+              sx={{
+                backgroundColor: "#DB4437",
+                color: "white",
+                height: "45px",
+                borderRadius:"12px"
+              }}
+              onClick={handleGoogleSignIn}
+            >
+              <Googleicon sx={{ fontSize: 20, mr: 1 }} /> Sign in with Google
             </Button>
 
             {/* Sign Up Link */}
             <div className="text-sm text-center text-gray-600 mt-4">
-              Don't have an account? 
-              <Link to="/Register" className="text-blue-400 text-sm">Sign up</Link>
-              </div>
+              Don't have an account?
+              <Link to="/Register" className="text-blue-400 text-sm ml-1">
+                Sign up
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>
